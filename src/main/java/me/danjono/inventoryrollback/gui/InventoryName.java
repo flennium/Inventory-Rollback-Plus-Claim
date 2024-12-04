@@ -8,8 +8,9 @@ public enum InventoryName {
 	PLAYER_MENU("Player Data", 9),
 	ROLLBACK_LIST("Rollbacks", ConfigData.getBackupLinesVisible() * 9 + 9),
 	MAIN_BACKUP("Main Inventory Backup", 54),
-    ENDER_CHEST_BACKUP("Ender Chest Backup", 36);
-	
+    ENDER_CHEST_BACKUP("Ender Chest Backup", 36),
+	CLAIM_BACKUP("Claim Backups", 54);
+
 	private final String menuName;
 	private final int size;
 	

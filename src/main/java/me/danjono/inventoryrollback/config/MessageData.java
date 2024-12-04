@@ -81,6 +81,10 @@ public class MessageData {
     private static String mainInventoryNotOnline;
     private static String mainInventoryButton;
     private static String mainInventoryDisabledButton;
+    private static String mainInventoryAlreadyClaimed;
+    private static String mainInventoryAlreadyApproved;
+    private static String mainInventoryApproved;
+    private static String mainInventoryClaimed;
 
     // Ender chest GUI messages
     private static String enderChestRestored;
@@ -151,6 +155,11 @@ public class MessageData {
         setMainInventoryNotOnline(convertColorCodes((String) getDefaultValue("attribute-restore.main-inventory.not-online", "You can't restore %NAME%'s inventory while they are offline.")));
         setMainInventoryButton(convertColorCodes((String) getDefaultValue("attribute-restore.main-inventory.button-name", "&cOverwrite Main Inventory from Backup")));
         setMainInventoryDisabledButton(convertColorCodes((String) getDefaultValue("attribute-restore.main-inventory.button-disabled", "&cYou must enable this option in the configuration")));
+
+        setMainInventoryAlreadyClaimed(convertColorCodes((String) getDefaultValue("attribute-restore.main-inventory.already-claimed", "%NAME%''s main inventory has already been claimed.")));
+        setMainInventoryAlreadyApproved(convertColorCodes((String) getDefaultValue("attribute-restore.main-inventory.already-approved", "%NAME%''s main inventory has already been approved.")));
+        setMainInventoryApproved(convertColorCodes((String) getDefaultValue("attribute-restore.main-inventory.approved", "%NAME%''s main inventory is now approved.")));
+        setMainInventoryClaimed(convertColorCodes((String) getDefaultValue("attribute-restore.main-inventory.claimed", "You have successfully claimed your backup.")));
 
         // Ender chest gui
         setEnderChestRestored(convertColorCodes((String) getDefaultValue("attribute-restore.ender-chest.restored", "%NAME%'s ender chest has been restored.")));
@@ -276,6 +285,20 @@ public class MessageData {
     public static void setMainInventoryDisabledButton(String message) {
         mainInventoryDisabledButton = message;
     }
+
+    public static void setMainInventoryAlreadyClaimed(String message) {
+        mainInventoryAlreadyClaimed = message;
+    }
+    public static void setMainInventoryAlreadyApproved(String message) {
+        mainInventoryAlreadyApproved = message;
+    }
+    public static void setMainInventoryApproved(String message) {
+        mainInventoryApproved = message;
+    }
+    public static void setMainInventoryClaimed(String message) {
+        mainInventoryClaimed = message;
+    }
+
 
     public static void setEnderChestRestored(String message) {
         enderChestRestored = message;
@@ -480,6 +503,22 @@ public class MessageData {
     public static String getMainInventoryDisabledButton() {
         return mainInventoryDisabledButton;
     }
+
+    public static String getMainInventoryAlreadyClaimed(String name) {
+        return mainInventoryAlreadyClaimed.replaceAll(nameVariable, name);
+    }
+    public static String getMainInventoryAlreadyApproved(String name) {
+        return mainInventoryAlreadyClaimed.replaceAll(nameVariable, name);
+    }
+
+    public static String getMainInventoryApproved(String name) {
+        return mainInventoryApproved.replaceAll(nameVariable, name);
+    }
+
+    public static String getMainInventoryClaimed() {
+        return mainInventoryClaimed;
+    }
+
 
     public static String getEnderChestRestored(String name) {
         return enderChestRestored.replaceAll(nameVariable, name);

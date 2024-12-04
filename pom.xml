@@ -5,7 +5,7 @@
 
     <groupId>com.nuclyon.technicallycoded.inventoryrollback</groupId>
     <artifactId>InventoryRollbackPlus</artifactId>
-    <version>1.6.20</version>
+    <version>1.6.21</version>
     <packaging>jar</packaging>
     <name>InventoryRollbackPlus</name>
     <url>https://github.com/TechnicallyCoded/Inventory-Rollback-Plus/</url>
@@ -45,12 +45,6 @@
 
     <dependencies>
         <!-- Spigot API -->
-        <dependency>
-            <groupId>org.spigotmc</groupId>
-            <artifactId>spigot-api</artifactId>
-            <version>1.20.5-R0.1-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
         <!--<dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot</artifactId>
@@ -62,9 +56,8 @@
         </dependency>-->
         <dependency>
             <groupId>org.spigotmc</groupId>
-            <artifactId>spigot</artifactId>
+            <artifactId>spigot-api</artifactId>
             <version>1.20.5-R0.1-SNAPSHOT</version>
-            <optional>true</optional>
             <scope>provided</scope>
         </dependency>
         <!-- bStats API -->
@@ -97,7 +90,7 @@
         <dependency>
             <groupId>com.github.lightlibs</groupId>
             <artifactId>BukkitVersion</artifactId>
-            <version>0.0.8</version>
+            <version>0.0.9</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
@@ -119,8 +112,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <source>8</source>
-                    <target>8</target>
+                    <source>9</source>
+                    <target>9</target>
                     <showWarnings>true</showWarnings>
                     <showDeprecation>true</showDeprecation>
                 </configuration>

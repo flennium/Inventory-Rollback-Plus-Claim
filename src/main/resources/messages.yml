@@ -24,6 +24,11 @@ attribute-restore:
     not-online: 'You can''t restore %NAME%''s inventory while they are offline.'
     button-name: '&cOVERWRITE Inventory from Backup'
     button-disabled: '&cSingle click restore is disabled\n&cin the config.yml file!'
+    already-claimed: '%NAME%''s main inventory has already been claimed.'
+    already-approved: '%NAME%''s main inventory has already been approved.'
+    approved: '%NAME%''s main inventory is now approved.'
+    claimed: 'You have successfully claimed your backup.'
+
   ender-chest:
     restored: '%NAME%''s ender chest has been restored.'
     restored-player: 'Your ender chest has been restored by %NAME% from backup.'

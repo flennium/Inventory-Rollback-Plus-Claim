@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import me.danjono.inventoryrollback.gui.menu.ClaimMenu;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
@@ -40,6 +41,10 @@ public class Commands extends ConfigData implements CommandExecutor, TabComplete
             switch (args[0]) {
             case "restore":
                 restoreCommand(sender, args);
+                break;
+
+            case "claim":
+                claimCommand(sender);
                 break;
 
             case "forcebackup":
@@ -101,6 +106,29 @@ public class Commands extends ConfigData implements CommandExecutor, TabComplete
             sender.sendMessage(MessageData.getPluginPrefix() + MessageData.getPlayerOnlyError());
         }
     }
+    private void claimCommand(CommandSender sender) {
+        if (sender instanceof Player) {
+            if (sender.hasPermission("inventoryrollback.claim")) {
+                if (!ConfigData.isEnabled()) {
+                    sender.sendMessage(MessageData.getPluginPrefix() + MessageData.getPluginDisabled());
+                    return;
+                }
+
+                openClaimMenu(((Player) sender).getPlayer());
+            } else {
+                sender.sendMessage(MessageData.getPluginPrefix() + MessageData.getNoPermission());
+            }
+        } else {
+            sender.sendMessage(MessageData.getPluginPrefix() + MessageData.getPlayerOnlyError());
+        }
+    }
+
+
+    private void openClaimMenu(Player player) {
+        ClaimMenu menu = new ClaimMenu(player, 1);
+        player.openInventory(menu.getInventory());
+    }
+
 
     private void openBackupMenu(CommandSender sender, Player staff, String[] args) {
         if (args.length <= 0 || args.length == 1) {
@@ -286,6 +314,9 @@ public class Commands extends ConfigData implements CommandExecutor, TabComplete
 
         if (sender.hasPermission("inventoryrollback.version"))
             commands.add("version");
+
+        if (sender.hasPermission("inventoryrollback.claim"))
+            commands.add("claim");
 
         if (!commands.isEmpty())
             StringUtil.copyPartialMatches(args[0], commands, completions);

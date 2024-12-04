@@ -55,7 +55,8 @@ public class PlayerData {
         return this.offlinePlayer;
         
     }
-    
+
+
     public LogType getLogType() {
         return this.logType;
     }
@@ -250,6 +251,24 @@ public class PlayerData {
         }
     }
 
+    public void setIsClaimed(Boolean IsClaimed) {
+        if (ConfigData.getSaveType() == SaveType.YAML) {
+            yaml.setIsClaimed(IsClaimed);
+        }
+    }
+
+    public void setIsApproved(Boolean IsApproved) {
+        if (ConfigData.getSaveType() == SaveType.YAML) {
+            yaml.setIsApproved(IsApproved);
+        }
+    }
+
+    public void setClaimedIn(Long claimedIn) {
+        if (ConfigData.getSaveType() == SaveType.YAML) {
+            yaml.setClaimedIn(claimedIn);
+        }
+    }
+
     public void getRollbackMenuData() {
         if (ConfigData.getSaveType() == SaveType.MYSQL) {
             try {
@@ -278,6 +297,7 @@ public class PlayerData {
         return future;
     }
 
+
     public ItemStack[] getMainInventory() {
         ItemStack[] items = {};
 
@@ -300,6 +320,32 @@ public class PlayerData {
         }
 
         return items;
+    }
+    public Boolean getIsClaimed() {
+        boolean IsClaimed = false;
+
+        if (ConfigData.getSaveType() == SaveType.YAML) {
+            IsClaimed = yaml.getIsClaimed();
+        }
+        return IsClaimed;
+    }
+
+    public Boolean getIsApproved() {
+        boolean IsApproved = false;
+
+        if (ConfigData.getSaveType() == SaveType.YAML) {
+            IsApproved = yaml.getIsApproved();
+        }
+        return IsApproved;
+    }
+
+    public Long getClaimedIn() {
+        Long ClaimedIn = -1L;
+
+        if (ConfigData.getSaveType() == SaveType.YAML) {
+            ClaimedIn = yaml.getClaimedIn();
+        }
+        return ClaimedIn;
     }
 
     public ItemStack[] getEnderChest() {

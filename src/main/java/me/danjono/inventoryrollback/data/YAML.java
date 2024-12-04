@@ -7,6 +7,7 @@ import me.danjono.inventoryrollback.gui.InventoryName;
 import me.danjono.inventoryrollback.inventory.RestoreInventory;
 import me.danjono.inventoryrollback.inventory.SaveInventory;
 import org.apache.commons.lang3.StringUtils;
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -15,10 +16,7 @@ import org.bukkit.inventory.ItemStack;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class YAML {
 
@@ -42,6 +40,9 @@ public class YAML {
     private LogType logType;
     private String packageVersion;
     private String deathReason;
+    public Boolean isClaimed = false;
+    public Boolean isApproved = false;
+    public Long ClaimedIn = -1L;
 
     private static final String backupFolderName = "backups";
 
@@ -272,6 +273,17 @@ public class YAML {
         this.deathReason = deathReason;
     }
 
+    public void setIsApproved(boolean Approved) {
+        this.isApproved = Approved;
+    }
+    public void setIsClaimed(boolean claimed) {
+        this.isClaimed = claimed;
+    }
+
+    public void setClaimedIn(Long ClaimedIn) {
+        this.ClaimedIn = ClaimedIn;
+    }
+
     public ItemStack[] getMainInventory() {
         String base64 = data.getString("inventory");
         return RestoreInventory.getInventoryItems(getVersion(), base64);
@@ -339,6 +351,34 @@ public class YAML {
         return data.getString("deathReason");
     }
 
+    public Boolean getIsClaimed() {
+        return data.getBoolean("isClaimed", false);
+    }
+
+    public Boolean getIsApproved() {
+        return data.getBoolean("isApproved", false);
+    }
+
+    public Long getClaimedIn() {
+        return this.ClaimedIn;
+    }
+
+    public Date getDate() {
+        return new Date(this.timestamp);
+    }
+
+    public LogType getLogType() {
+        return this.logType;
+    }
+
+    public UUID getUUID() {
+        return this.uuid;
+    }
+
+    public Long getTimestamp() {
+        return this.timestamp;
+    }
+
     public void saveData() {
         data.set("inventory", mainInventory);
         data.set("armour", armour);
@@ -354,6 +394,9 @@ public class YAML {
         data.set("logType", logType.name());
         data.set("version", packageVersion);
         data.set("deathReason", deathReason);
+        data.set("isClaimed", isClaimed);
+        data.set("ClaimedIn", ClaimedIn);
+        data.set("isApproved", isApproved);
 
         try {
             data.save(backupFile);
@@ -362,6 +405,58 @@ public class YAML {
 
         }
     }
+
+    public static List<YAML> getBackupDataByUUID(UUID playerUUID) {
+        List<YAML> backupDataList = new ArrayList<>();
+
+        for (LogType logType : LogType.values()) {
+            File playerFolder = getPlayerBackupLocation(logType, playerUUID);
+            if (playerFolder == null || !playerFolder.exists()) continue;
+
+            File[] backupFiles = playerFolder.listFiles();
+            if (backupFiles == null) continue;
+
+            for (File backupFile : backupFiles) {
+                if (backupFile.getName().endsWith(".yml")) {
+                    String fileName = backupFile.getName();
+                    String timestampStr = fileName.substring(0, fileName.length() - 4);
+                    long timestamp;
+                    try {
+                        timestamp = Long.parseLong(timestampStr);
+                    } catch (NumberFormatException ex) {
+                        Bukkit.getLogger().warning("Failed to parse timestamp from file name: " + fileName);
+                        continue;
+                    }
+
+                    YamlConfiguration data = YamlConfiguration.loadConfiguration(backupFile);
+                    YAML backupData = new YAML(playerUUID, logType, timestamp);
+
+                    backupData.mainInventory = data.getString("inventory");
+                    backupData.armour = data.getString("armour");
+                    backupData.enderChest = data.getString("enderchest");
+                    backupData.xp = Float.parseFloat(data.getString("xp"));
+                    backupData.health = data.getDouble("health");
+                    backupData.hunger = data.getInt("hunger");
+                    backupData.saturation = Float.parseFloat(data.getString("saturation"));
+                    backupData.world = data.getString("location.world");
+                    backupData.x = data.getDouble("location.x");
+                    backupData.y = data.getDouble("location.y");
+                    backupData.z = data.getDouble("location.z");
+                    backupData.logType = LogType.valueOf(data.getString("logType").toUpperCase());
+                    backupData.packageVersion = data.getString("version");
+                    backupData.deathReason = data.getString("deathReason");
+                    backupData.isClaimed = data.getBoolean("isClaimed");
+                    backupData.isApproved = data.getBoolean("isApproved");
+                    backupData.ClaimedIn = data.getLong("ClaimedIn");
+
+                    backupDataList.add(backupData);
+                }
+            }
+        }
+
+        return backupDataList;
+    }
+
 
     public static String getBackupFolderName() {
         return backupFolderName;
@@ -432,6 +527,8 @@ public class YAML {
                         yaml.setX(data.getDouble("data." + timestamp + ".location.x"));
                         yaml.setY(data.getDouble("data." + timestamp + ".location.y"));
                         yaml.setZ(data.getDouble("data." + timestamp + ".location.z"));
+                        yaml.setZ(data.getDouble("data." + timestamp + ".location.z"));
+
 
                         String lt = data.getString("data." + timestamp + ".logType");
                         LogType logType = null;

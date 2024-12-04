@@ -9,6 +9,7 @@ import me.danjono.inventoryrollback.config.MessageData;
 import me.danjono.inventoryrollback.config.SoundData;
 import me.danjono.inventoryrollback.data.LogType;
 import me.danjono.inventoryrollback.data.PlayerData;
+import me.danjono.inventoryrollback.data.YAML;
 import me.danjono.inventoryrollback.gui.Buttons;
 import me.danjono.inventoryrollback.gui.InventoryName;
 import me.danjono.inventoryrollback.gui.menu.*;
@@ -24,6 +25,7 @@ import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.util.ArrayList;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -77,7 +79,8 @@ public class ClickGUI implements Listener {
                 && !title.equals(InventoryName.PLAYER_MENU.getName()) 
                 && !title.equalsIgnoreCase(InventoryName.ROLLBACK_LIST.getName())
                 && !title.equalsIgnoreCase(InventoryName.MAIN_BACKUP.getName())
-                && !title.equalsIgnoreCase(InventoryName.ENDER_CHEST_BACKUP.getName()))
+                && !title.equalsIgnoreCase(InventoryName.ENDER_CHEST_BACKUP.getName())
+                && !title.equalsIgnoreCase(InventoryName.CLAIM_BACKUP.getName()))
             return;
 
         //Check if inventory is a virtual one and not one that has the same name on a player chest
@@ -115,10 +118,100 @@ public class ClickGUI implements Listener {
             enderChestBackupMenu(e,staff, icon);
         }
 
+        //Listener for claim backup menu
+        else if (title.equals(InventoryName.CLAIM_BACKUP.getName())) {
+            claimMenu(e,staff, icon);
+        }
         else {
             e.setCancelled(true);
         }
     }
+    private void claimMenu(InventoryClickEvent e, Player staff, ItemStack icon) {
+        if (icon == null) return;
+
+        if (e.getRawSlot() >= 0 && e.getRawSlot() < InventoryName.CLAIM_BACKUP.getSize()) {
+            NBTWrapper nbt = new NBTWrapper(icon);
+
+            if (!nbt.hasUUID()) return;
+            int backup = nbt.getInt("backup");
+
+            if (icon.getType().equals(Buttons.getPageSelectorIcon())) {
+                int page = nbt.getInt("page");
+
+                ClaimMenu menu = new ClaimMenu(staff, page);
+                staff.openInventory(menu.getInventory());
+
+            } else if (backup == 1) {
+                Long timestamp = nbt.getLong("timestamp");
+                UUID playerUUID = UUID.fromString(nbt.getString("uuid"));
+                String logTypeStr = nbt.getString("logType");
+                LogType logType = LogType.valueOf(logTypeStr);
+                boolean alreadyClaimed = nbt.getInt("IsClaimed") == 1;
+                boolean notApproved = nbt.getInt("IsApproved") != 1;
+
+                // Get offline player for the UUID
+                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerUUID);
+
+                if (offlinePlayer.isOnline()) {
+                    Player player = (Player) offlinePlayer;
+
+                    new BukkitRunnable() {
+                        @Override
+                        public void run() {
+                            // Init from MySQL or, if YAML, init & load config file
+                            PlayerData data = new PlayerData(offlinePlayer, logType, timestamp);
+
+                            boolean alreadyClaimed = data.getIsClaimed();
+                            boolean notApproved = !data.getIsApproved();
+
+                            if (alreadyClaimed || notApproved) {
+                                e.setCancelled(true);
+                                return;
+                            }
+
+                            ItemStack[] inventory = data.getMainInventory();
+                            ItemStack[] armour = data.getArmour();
+
+                            // Place inventory items sync (compressed code)
+                            Future<Void> futureSetInv = main.getServer().getScheduler().callSyncMethod(main,
+                                    () -> { player.getInventory().setContents(inventory); return null; });
+                            try { futureSetInv.get(); }
+                            catch (ExecutionException | InterruptedException ex) { ex.printStackTrace(); }
+
+                            // If 1.8, place armor contents separately
+                            if (main.getVersion().lessOrEqThan(BukkitVersion.v1_8_R3)) {
+                                // Place items sync (compressed code)
+                                Future<Void> futureSetArmor = main.getServer().getScheduler().callSyncMethod(main,
+                                        () -> { player.getInventory().setArmorContents(armour); return null; });
+                                try { futureSetArmor.get(); }
+                                catch (ExecutionException | InterruptedException ex) { ex.printStackTrace(); }
+                            }
+
+                            // Play sound effect if enabled
+                            if (SoundData.isInventoryRestoreEnabled()) {
+                                // Play sound sync (compressed code)
+                                Future<Void> futurePlaySound = main.getServer().getScheduler().callSyncMethod(main,
+                                        () -> { player.playSound(player.getLocation(), SoundData.getInventoryRestored(), 1, 1); return null; });
+                                try { futurePlaySound.get(); }
+                                catch (ExecutionException | InterruptedException ex) { ex.printStackTrace(); }
+                            }
+
+                            // Mark the backup as approved and claimed
+                            data.setIsApproved(true);
+                            data.setIsClaimed(true);
+                            data.setClaimedIn(System.currentTimeMillis());
+                            data.saveData(true);
+
+                            staff.sendMessage(MessageData.getPluginPrefix() + MessageData.getMainInventoryClaimed());
+                        }
+                    }.runTaskAsynchronously(main);
+                }
+
+            }
+        }
+    }
+
+
 
     private void mainMenu(InventoryClickEvent e, Player staff, ItemStack icon) {
         if ((e.getRawSlot() >= 0 && e.getRawSlot() < InventoryName.MAIN_MENU.getSize())) {                
@@ -279,7 +372,6 @@ public class ClickGUI implements Listener {
                 Bukkit.getScheduler().runTaskAsynchronously(InventoryRollback.getInstance(), menu::showBackups);
             }
 
-            //Clicked icon to overwrite player inventory with backup data
             else if (icon.getType().equals(Buttons.getRestoreAllInventoryIcon())) {
                 // Perm check
                 if (!staff.hasPermission("inventoryrollbackplus.restore")) {
@@ -287,61 +379,23 @@ public class ClickGUI implements Listener {
                     return;
                 }
 
-                if (offlinePlayer.isOnline()) {
-                    Player player = (Player) offlinePlayer;
-
-                    new BukkitRunnable() {
-                        @Override
-                        public void run() {
-                            // Init from MySQL or, if YAML, init & load config file
-                            PlayerData data = new PlayerData(offlinePlayer, logType, timestamp);
-
-                            // Get data if using MySQL
-                            if (ConfigData.getSaveType() == ConfigData.SaveType.MYSQL) {
-                                try {
-                                    data.getAllBackupData().get();
-                                } catch (ExecutionException | InterruptedException ex) {
-                                    ex.printStackTrace();
-                                }
-                            }
-
-                            ItemStack[] inventory = data.getMainInventory();
-                            ItemStack[] armour = data.getArmour();
-
-                            // Place inventory items sync (compressed code)
-                            Future<Void> futureSetInv = main.getServer().getScheduler().callSyncMethod(main,
-                                    () -> { player.getInventory().setContents(inventory); return null; });
-                            try { futureSetInv.get(); }
-                            catch (ExecutionException | InterruptedException ex) { ex.printStackTrace(); }
-
-                            // If 1.8, place armor contents separately
-                            if (main.getVersion().lessOrEqThan(BukkitVersion.v1_8_R3)) {
-                                // Place items sync (compressed code)
-                                Future<Void> futureSetArmor = main.getServer().getScheduler().callSyncMethod(main,
-                                        () -> { player.getInventory().setArmorContents(armour); return null; });
-                                try { futureSetArmor.get(); }
-                                catch (ExecutionException | InterruptedException ex) { ex.printStackTrace(); }
-                            }
-
-                            // Play sound effect is enabled
-                            if (SoundData.isInventoryRestoreEnabled()) {
-                                // Play sound sync (compressed code)
-                                Future<Void> futurePlaySound = main.getServer().getScheduler().callSyncMethod(main,
-                                        () -> { player.playSound(player.getLocation(), SoundData.getInventoryRestored(), 1, 1); return null; });
-                                try { futurePlaySound.get(); }
-                                catch (ExecutionException | InterruptedException ex) { ex.printStackTrace(); }
-                            }
-
-                            // Send player & staff feedback
-                            player.sendMessage(MessageData.getPluginPrefix() + MessageData.getMainInventoryRestoredPlayer(staff.getName()));
-                            if (!staff.getUniqueId().equals(player.getUniqueId()))
-                                staff.sendMessage(MessageData.getPluginPrefix() + MessageData.getMainInventoryRestored(offlinePlayer.getName()));
-                        }
-                    }.runTaskAsynchronously(main);
-
-                } else {
-                    staff.sendMessage(MessageData.getPluginPrefix() + MessageData.getMainInventoryNotOnline(offlinePlayer.getName()));
+                PlayerData data = new PlayerData(offlinePlayer, logType, timestamp);
+                if (data.getIsClaimed() || data.getIsApproved()) {
+                    if (data.getIsClaimed()) {
+                        // Using the claimed message
+                        staff.sendMessage(MessageData.getPluginPrefix() + MessageData.getMainInventoryAlreadyClaimed(offlinePlayer.getName()));
+                    } else if (data.getIsApproved()) {
+                        // Using the approved message
+                        staff.sendMessage(MessageData.getPluginPrefix() + MessageData.getMainInventoryAlreadyApproved(offlinePlayer.getName()));
+                    }
+                    return;
                 }
+
+                // If not claimed or approved, approve the data
+                data.setIsApproved(true);
+                data.saveData(true);
+                // Send message that it's been approved
+                staff.sendMessage(MessageData.getPluginPrefix() + MessageData.getMainInventoryApproved(offlinePlayer.getName()));
             }
 
             // Clicked icon to teleport player to backup coordinates
@@ -468,7 +522,7 @@ public class ClickGUI implements Listener {
                 } else {
                     staff.sendMessage(MessageData.getPluginPrefix() + MessageData.getHungerNotOnline(offlinePlayer.getName()));
                 }
-            } 
+            }
 
             //Clicked icon to restore backup players experience
             else if (icon.getType().equals(Buttons.getExperienceIcon())) {

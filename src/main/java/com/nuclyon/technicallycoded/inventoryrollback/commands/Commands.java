@@ -16,7 +16,7 @@ public class Commands implements CommandExecutor, TabCompleter {
 
     private InventoryRollbackPlus main;
 
-    private String[] defaultOptions = new String[] {"restore", "forcebackup", "enable", "disable", "reload", "version", "import", "help"};
+    private String[] defaultOptions = new String[] {"restore", "claim", "forcebackup", "enable", "disable", "reload", "version", "import", "help"};
     private String[] backupOptions = new String[] {"all", "player"};
     private String[] importOptions = new String[] {"confirm"};
 
@@ -25,6 +25,7 @@ public class Commands implements CommandExecutor, TabCompleter {
     public Commands(InventoryRollbackPlus mainIn) {
         this.main = mainIn;
         this.subCommands.put("restore", new RestoreSubCmd(mainIn));
+        this.subCommands.put("claim", new ClaimSubCmd(mainIn));
         this.subCommands.put("enable", new EnableSubCmd(mainIn));
         this.subCommands.put("disable", new DisableSubCmd(mainIn));
         this.subCommands.put("reload", new ReloadSubCmd(mainIn));

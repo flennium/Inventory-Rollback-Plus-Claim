@@ -24,3 +24,21 @@ jobs:
 
       - name: Build with Maven
         run: mvn clean install
+
+      - name: Upload Release Artifact
+        uses: softprops/action-gh-release@v1
+        with:
+          files: target/*.jar
+
+      - name: Create Release
+        uses: github-actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.run_number }}
+          release_name: 'Release v${{ github.run_number }}'
+          body: |
+            **Changelog**
+            - Added new features
+            - Fixed bugs
+            - Optimized code

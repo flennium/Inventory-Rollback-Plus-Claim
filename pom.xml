@@ -7,7 +7,7 @@
     <artifactId>InventoryRollbackPlus</artifactId>
     <version>1.6.21</version>
     <packaging>jar</packaging>
-    <name>InventoryRollbackPlus (Claim)</name>
+    <name>InventoryRollbackPlus-Claim</name>
     <url>https://github.com/TechnicallyCoded/Inventory-Rollback-Plus/</url>
 
     <organization>

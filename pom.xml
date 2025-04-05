@@ -44,6 +44,10 @@
             <id>jitpack</id>
             <url>https://jitpack.io</url>
         </repository>
+        <repository>
+            <id>papermc</id>
+            <url>https://papermc.io/repo/repository/maven-public/</url>
+        </repository>
 
     </repositories>
 
@@ -74,7 +78,12 @@
             <scope>compile</scope>
         </dependency>
         <!-- Paper-Lib -->
-
+        <dependency>
+            <groupId>io.papermc</groupId>
+            <artifactId>PaperLib</artifactId>
+            <version>1.0.7</version>
+            <scope>compile</scope>
+        </dependency>
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>

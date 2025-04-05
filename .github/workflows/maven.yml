@@ -1,40 +1,33 @@
-name: Build Plugin
+name: Publish and Tag
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
+  release:
+    types: [published, edited]
+
+# Add necessary permissions
+permissions:
+  contents: write
+  pull-requests: write
 
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
-
     steps:
-      # Checkout the code with proper permissions
       - name: Checkout code
-        uses: actions/checkout@v4
-
-      # Set up JDK 21 using modern action version
-      - name: Set up JDK 21 (Eclipse Temurin)
-        uses: actions/setup-java@v4
+        uses: actions/checkout@v4  # Updated to modern version
         with:
-          java-version: '21'
-          distribution: 'temurin'
+          ref: ${{ github.event.release.tag_name }}
+          fetch-depth: 0  # Get full git history
 
-      # Build with Maven
-      - name: Build with Maven
-        run: mvn clean install
+      - name: Install dependencies and build
+        run: npm ci && npm run build
 
-      # Create Release and Upload Artifact (only on push to main)
-      - name: Create Release and Upload Artifact
-        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: softprops/action-gh-release@v1
+      - name: Build and Tag
+        uses: JasonEtco/build-and-tag-action@v2
         with:
-          files: target/*.jar
-          tag_name: v${{ github.run_number }}
-          generate_release_notes: true
+          # Explicit configuration
+          script: npm run build
+          commit_message: "chore: build update"
+          branch: main  # Specify target branch
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

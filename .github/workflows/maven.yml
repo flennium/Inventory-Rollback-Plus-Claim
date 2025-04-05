@@ -13,13 +13,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout the code
+      # Checkout the code with proper permissions
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      # Set up JDK 21 (Eclipse Temurin)
+      # Set up JDK 21 using modern action version
       - name: Set up JDK 21 (Eclipse Temurin)
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'temurin'
@@ -28,18 +28,13 @@ jobs:
       - name: Build with Maven
         run: mvn clean install
 
-      # Create a new tag based on the run number
-      - name: Create a Tag
-        run: |
-          TAG="v${{ github.run_number }}"
-          git tag $TAG
-          git push origin $TAG
-
-      # Create Release and Upload Artifact
+      # Create Release and Upload Artifact (only on push to main)
       - name: Create Release and Upload Artifact
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v1
         with:
           files: target/*.jar
-          tag_name: v${{ github.run_number }}  # Using the tag we just created
+          tag_name: v${{ github.run_number }}
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

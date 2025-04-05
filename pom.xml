@@ -76,7 +76,7 @@
         <!-- Paper-Lib -->
         <dependency>
             <groupId>io.papermc</groupId>
-            <artifactId>PaperLib</artifactId>
+            <artifactId>paperlib</artifactId>
             <version>1.0.7</version>
             <scope>compile</scope>
         </dependency>

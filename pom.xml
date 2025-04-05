@@ -7,7 +7,7 @@
     <artifactId>InventoryRollbackPlus</artifactId>
     <version>1.6.21</version>
     <packaging>jar</packaging>
-    <name>InventoryRollbackPlus(Claim)</name>
+    <name>InventoryRollbackPlus (Claim)</name>
     <url>https://github.com/TechnicallyCoded/Inventory-Rollback-Plus/</url>
 
     <organization>
@@ -44,11 +44,9 @@
             <id>papermc</id>
             <url>https://papermc.io/repo/repository/maven-public/</url>
         </repository>
-
     </repositories>
 
     <dependencies>
-
         <dependency>
             <groupId>org.spigotmc</groupId>
             <artifactId>spigot-api</artifactId>
@@ -57,42 +55,34 @@
             <scope>provided</scope>
         </dependency>
 
-        <!--<dependency>
-            <groupId>org.spigotmc</groupId>
-            <artifactId>spigot</artifactId>
-            <version>1.19.3</version>
-            <scope>system</scope>
-            <type>jar</type>
-            <systemPath>${project.basedir}/lib/spigot-1.19.3.jar</systemPath>
-            <optional>true</optional>
-        </dependency>-->
-        <!-- bStats API -->
         <dependency>
             <groupId>org.bstats</groupId>
             <artifactId>bstats-bukkit</artifactId>
             <version>3.0.2</version>
             <scope>compile</scope>
         </dependency>
-        <!-- Paper-Lib -->
+
         <dependency>
             <groupId>io.papermc</groupId>
             <artifactId>paperlib</artifactId>
             <version>1.0.6</version>
             <scope>compile</scope>
         </dependency>
+
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
             <version>24.1.0</version>
             <scope>compile</scope>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.14.0</version>
             <scope>compile</scope>
         </dependency>
+
         <dependency>
             <groupId>com.github.lightlibs</groupId>
             <artifactId>BukkitVersion</artifactId>
@@ -102,7 +92,8 @@
     </dependencies>
 
     <build>
-        <finalName>Inventory-Rollback-Plus(Claim)-${project.version}</finalName>
+        <finalName>Inventory-Rollback-Plus-Claim-${project.version}</finalName>
+
         <resources>
             <resource>
                 <directory>${project.basedir}/src/main/resources</directory>
@@ -112,6 +103,7 @@
                 <filtering>true</filtering>
             </resource>
         </resources>
+
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -124,6 +116,7 @@
                     <showDeprecation>true</showDeprecation>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -180,6 +173,7 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -195,5 +189,6 @@
             </plugin>
         </plugins>
     </build>
+
     <description>Allows server moderators to restore player items and data from backups.</description>
 </project>

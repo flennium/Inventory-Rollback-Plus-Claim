@@ -1,9 +1,9 @@
-name = ${project.name}
+name: ${project.name}
 main: ${project.groupId}.InventoryRollbackPlus
 version: ${project.version}
 description: ${project.description}
 author: ${project.organization.name}
-authors: [${project.organization.name}, danjono, flennn(Claim)]
+authors: [${project.organization.name}, danjono]
 api-version: 1.13
 commands:
   inventoryrollbackplus:

@@ -33,10 +33,6 @@
             <url>https://hub.spigotmc.org/nexus/content/repositories/public/</url>
         </repository>
         <repository>
-            <id>papermc</id>
-            <url>https://papermc.io/repo/repository/maven-public/</url>
-        </repository>
-        <repository>
             <id>maven_central</id>
             <url>https://repo.maven.apache.org/maven2/</url>
         </repository>
